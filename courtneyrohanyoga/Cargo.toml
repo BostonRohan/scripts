@@ -1,0 +1,17 @@
+[package]
+name = "courtneyrohanyoga"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+reqwest = { version = "0.11.24", features = ["blocking"] }
+scraper = "0.19.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.10.3"
+
+
+[[bin]]
+name = "blogger-sanity-image"
+path = "src/bin/blogger-sanity-image/main.rs"
