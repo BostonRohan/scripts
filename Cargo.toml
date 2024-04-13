@@ -15,7 +15,3 @@ pretty_env_logger = "0.4"
 [[bin]]
 name = "courtneyrohan-migrate-blogger-images"
 path = "src/bin/courtneyrohan/blogger-sanity-image/main.rs"
-
-[[bin]]
-name = "test"
-path = "src/bin/courtneyrohan/test/main.rs"
