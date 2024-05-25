@@ -19,9 +19,5 @@ name = "courtneyrohan-migrate-blogger-images"
 path = "src/bin/courtneyrohan/blogger-sanity-image/main.rs"
 
 [[bin]]
-name = "gen-z-writes-yt"
-path = "src/bin/gen-z-writes/yt/main.rs"
-
-[[bin]]
 name = "mk-realestate"
 path = "src/bin/mk-realestate/main.rs"
