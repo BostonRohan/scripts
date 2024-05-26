@@ -1,9 +1,17 @@
-FROM rust:latest
+FROM rust:latest as builder
 
 ARG MLS_LISTINGS_URL
 ARG MK_REALESTATE_LISTINGS_API_TOKEN
 ARG MK_REALESTATE_LISTINGS_API_URL
 ARG RUST_LOG
+
+WORKDIR /usr/src/app
+
+COPY Cargo.toml Cargo.lock ./
+
+RUN cargo build --release
+
+FROM debian:buster-slim
 
 ENV MLS_LISTINGS_URL=$MLS_LISTINGS_URL
 ENV MK_REALESTATE_LISTINGS_API_TOKEN=$MK_REALESTATE_LISTINGS_API_TOKEN
@@ -12,8 +20,6 @@ ENV RUST_LOG=$RUST_LOG
 
 WORKDIR /usr/src/app
 
-COPY . .
+COPY --from=builder /usr/src/app/target/release/mk-realestate /usr/local/bin/mk-realestate
 
-RUN cargo build --release --bin mk-realestate
-
-ENTRYPOINT ["/usr/src/app/target/release/mk-realestate"]
+CMD ["mk-realestate"]
