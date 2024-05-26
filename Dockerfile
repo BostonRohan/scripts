@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 COPY Cargo.toml Cargo.lock ./
 
-RUN cargo build --release
+RUN cargo build --release --bin mk-realestate
 
 FROM debian:buster-slim
 
