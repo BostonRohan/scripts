@@ -25,7 +25,10 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/scripts:latest
-          build-args: MLS_LISTINGS_URL=${{ secrets.MLS_LISTINGS_URL }} MK_REALESTATE_LISTINGS_API_TOKEN=${{ secrets.MK_REALESTATE_LISTINGS_API_TOKEN }} MK_REALESTATE_LISTINGS_API_URL=${{ secrets.MK_REALESTATE_LISTINGS_API_URL }}
+          build-args: |
+            MLS_LISTINGS_URL=${{ secrets.MLS_LISTINGS_URL }}
+            MK_REALESTATE_LISTINGS_API_TOKEN=${{ secrets.MK_REALESTATE_LISTINGS_API_TOKEN }}
+            MK_REALESTATE_LISTINGS_API_URL=${{ secrets.MK_REALESTATE_LISTINGS_API_URL }}
 
       - name: Run Docker container
         run: |
