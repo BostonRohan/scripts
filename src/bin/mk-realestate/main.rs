@@ -30,6 +30,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mls_listings_url = env::var("MLS_LISTINGS_URL").expect("Missing `MLS_LISTINGS_URL`");
 
+    if mls_listings_url.is_empty() {
+        panic!("MLS_LISTINGS_URL: {:?}", mls_listings_url);
+    }
+
     let mls_listings_url =
         Url::parse(&mls_listings_url).expect("Unable to parse `MLS_LISTINGS_URL` as valid url");
 
