@@ -6,9 +6,7 @@ WORKDIR /app
 FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
-###########################################################
 
-###########################################################
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
 
@@ -26,3 +24,11 @@ ENV RUST_LOG=$RUST_LOG
 
 COPY . .
 RUN cargo build --release --target x86_64-unknown-linux-musl --bin mk-realestate
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/mk-realestate /usr/local/bin/mk-realestate
+
+CMD ["/usr/local/bin/mk-realestate"]
