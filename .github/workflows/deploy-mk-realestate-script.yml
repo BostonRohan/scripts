@@ -1,9 +1,9 @@
-name: Build and Push Docker Image
+name: Build and Run Docker Image
 
 on: push
 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,17 +19,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/scripts:latest
-          build-args: |
-            MLS_LISTINGS_URL: ${{ secrets.MLS_LISTINGS_URL }}
-            MK_REALESTATE_LISTINGS_API_TOKEN: ${{ secrets.MK_REALESTATE_LISTINGS_API_TOKEN }}
-            MK_REALESTATE_LISTINGS_API_URL: ${{ secrets.MK_REALESTATE_LISTINGS_API_URL }}
-            RUST_LOG: ${{ vars.RUST_LOG }}
+      - name: Build Docker image
+        run: |
+          docker build . \
+            --build-arg MLS_LISTINGS_URL=${{ secrets.MLS_LISTINGS_URL }} \
+            --build-arg MK_REALESTATE_LISTINGS_API_TOKEN=${{ secrets.MK_REALESTATE_LISTINGS_API_TOKEN }} \
+            --build-arg MK_REALESTATE_LISTINGS_API_URL=${{ secrets.MK_REALESTATE_LISTINGS_API_URL }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/scripts:latest
 
-      - name: Run container
-        run: docker run ${{ secrets.DOCKER_USERNAME }}/scripts:latest
+      - name: Run Docker container
+        run: |
+          docker run \
+            -e RUST_LOG=${{ vars.RUST_LOG }} \
+            ${{ secrets.DOCKER_USERNAME }}/scripts:latest
