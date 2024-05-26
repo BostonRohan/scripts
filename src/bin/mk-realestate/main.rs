@@ -4,6 +4,7 @@ use log::{debug, info};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::env;
+use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ListingsBody {
@@ -28,6 +29,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
 
     let mls_listings_url = env::var("MLS_LISTINGS_URL").expect("Missing `MLS_LISTINGS_URL`");
+
+    let mls_listings_url =
+        Url::parse(&mls_listings_url).expect("Unable to parse `MLS_LISTINGS_URL` as valid url");
 
     let mls_listings_resp = reqwest::get(mls_listings_url).await?.text().await?;
 
@@ -198,6 +202,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Missing `MK_REALESTATE_LISTINGS_API_URL`");
     let listings_api_token = env::var("MK_REALESTATE_LISTINGS_API_TOKEN")
         .expect("Missing `MK_REALESTATE_LISTINGS_API_TOKEN`");
+
+    let listings_api_url =
+        Url::parse(&listings_api_url).expect("Unable to parse `LISTINGS_API_URL` as valid url");
 
     let client = reqwest::Client::new();
 
