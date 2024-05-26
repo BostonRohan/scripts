@@ -1,0 +1,39 @@
+name: Build and Run Docker Image
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/scripts:latest
+          build-args: |
+            MLS_LISTINGS_URL=${{ secrets.MLS_LISTINGS_URL }}
+            MK_REALESTATE_LISTINGS_API_TOKEN=${{ secrets.MK_REALESTATE_LISTINGS_API_TOKEN }}
+            MK_REALESTATE_LISTINGS_API_URL=${{ secrets.MK_REALESTATE_LISTINGS_API_URL }}
+
+      - name: Run Docker container
+        run: |
+          docker run \
+            -e RUST_LOG=${{ vars.RUST_LOG }} \
+            ${{ secrets.DOCKER_USERNAME }}/scripts:latest

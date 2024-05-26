@@ -4,14 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11.24", features = ["blocking"] }
+reqwest = { version = "0.11.24", features = ["blocking", "json"] }
 scraper = "0.19.0"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0"
 regex = "1.10.3"
 log = "0.4"
 pretty_env_logger = "0.4"
+url = "2.2.2"
+tokio = { version = "1", features = ["full"] }
 
 [[bin]]
 name = "courtneyrohan-migrate-blogger-images"
 path = "src/bin/courtneyrohan/blogger-sanity-image/main.rs"
+
+[[bin]]
+name = "mk-realestate"
+path = "src/bin/mk-realestate/main.rs"
