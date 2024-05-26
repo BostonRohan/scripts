@@ -1,11 +1,9 @@
 FROM rust:latest
 
-WORKDIR /usr/src/bin/mk-realestate
-
-COPY Cargo.toml Cargo.lock ./
-
-RUN cargo build --release --bin mk-realestate
+WORKDIR /usr/src/app
 
 COPY . .
 
-ENTRYPOINT ["/usr/src/bin/target/release/mk-realestate"]
+RUN cargo build --release --bin mk-realestate
+
+ENTRYPOINT ["/usr/src/app/target/release/mk-realestate"]
