@@ -15,6 +15,8 @@ struct ListingsBody {
 struct Listing {
     address: String,
     cover_image: String,
+    //saving the images as a string becuase astro db doesn't support arrays yet
+    images: String,
     price: i32,
     description: String,
     listing_status: String,
@@ -22,6 +24,18 @@ struct Listing {
     bedrooms: i8,
     square_feet: i32,
     bathrooms: i8,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ListingImage {
+    thumb_url: String,
+    image_url: String,
+    comment: String,
+    copyright: String,
+    privacy_status: i8,
+    private_indicator_visible: bool,
+    private_indicator_text: String,
 }
 
 #[tokio::main]
@@ -36,6 +50,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mls_listings_resp = reqwest::get(mls_listings_url).await?.text().await?;
 
     let document = Html::parse_document(&mls_listings_resp);
+
+    let listing_ids_selector =
+        Selector::parse("input#hdnCheckedRidsFromMapView").expect("Unable to parse listing ids");
+    let listing_ids = document
+        .select(&listing_ids_selector)
+        .next()
+        .expect("Listing ids input not found")
+        .value()
+        .attr("value")
+        .expect("Listing ids not found")
+        .split(",")
+        .collect::<Vec<&str>>();
+
+    info!("listing ids: {:?}", listing_ids);
 
     let root_selector =
         Selector::parse("div.container").expect("Unable to parse root container div");
@@ -57,7 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut listings_results = Vec::new();
 
-    for listing in listings {
+    for (index, listing) in listings.iter().enumerate() {
         let listing = Html::parse_fragment(&listing.inner_html());
 
         let cover_image_selector =
@@ -178,14 +206,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .text()
             .collect::<String>();
 
-        info!(
-            "Address: {}, \n Cover image: {:?} \n Price: {} \n Listing number: {} \n Listing status: {} \n Bedrooms: {} \n Bathrooms: {} \n Square feet: {} \n Description: {}",
-            &address, &cover_image, price, listing_number, listing_status, bedrooms, bathrooms, square_feet, description.trim()
-        );
+        let session_number = env!("MLS_LISTINGS_SESSION_NUMBER");
+        let force_public_view = env!("MLS_LISTINGS_FORCE_PUBLIC_VIEW");
+
+        let mls_images_url = format!("https://barinet.rapmls.com/Handlers/PictureManagementHandler.ashx?hidMLS=BARI&SID=&SessionNumber={}&MemberNumber=0&c=listingdetailpictures&listingRid={}&forcePublicView={}", session_number, listing_ids.get(index).unwrap(), force_public_view);
+
+        let mls_images_res = reqwest::get(mls_images_url).await?;
+
+        let listing_images = mls_images_res
+            .json::<Vec<ListingImage>>()
+            .await
+            .unwrap_or_default();
+
+        info!("Listing Images: {:?}", &listing_images);
+
+        //Currently we know that if the image is public it will have a privacy status of 0
+        //Not sure of the other privacy statuses yet
+        let images: Vec<String> = listing_images
+            .iter()
+            .filter(|image| image.privacy_status == 0)
+            .map(|image| image.image_url.clone())
+            .collect();
 
         let listing = Listing {
             address,
             cover_image: cover_image.to_string(),
+            images: format!("{:?}", images),
             price,
             listing_number,
             listing_status,
