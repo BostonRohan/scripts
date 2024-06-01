@@ -13,6 +13,7 @@ struct ListingsBody {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Listing {
+    _id: i32,
     address: String,
     cover_image: String,
     //saving the images as a string becuase astro db doesn't support arrays yet
@@ -209,7 +210,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let session_number = env!("MLS_LISTINGS_SESSION_NUMBER");
         let force_public_view = env!("MLS_LISTINGS_FORCE_PUBLIC_VIEW");
 
-        let mls_images_url = format!("https://barinet.rapmls.com/Handlers/PictureManagementHandler.ashx?hidMLS=BARI&SID=&SessionNumber={}&MemberNumber=0&c=listingdetailpictures&listingRid={}&forcePublicView={}", session_number, listing_ids.get(index).unwrap(), force_public_view);
+        let listing_id = listing_ids
+            .get(index)
+            .expect("Unable to get listing id")
+            .parse::<i32>()
+            .expect("Could not parse listing id as an i32 integer");
+
+        let mls_images_url = format!("https://barinet.rapmls.com/Handlers/PictureManagementHandler.ashx?hidMLS=BARI&SID=&SessionNumber={}&MemberNumber=0&c=listingdetailpictures&listingRid={}&forcePublicView={}", session_number, listing_id, force_public_view);
 
         let mls_images_res = reqwest::get(mls_images_url).await?;
 
@@ -229,6 +236,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .collect();
 
         let listing = Listing {
+            _id: listing_id,
             address,
             cover_image: cover_image.to_string(),
             images: format!("{:?}", images),
