@@ -25,6 +25,7 @@ struct Listing {
     bedrooms: i8,
     square_feet: i32,
     bathrooms: i8,
+    county: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,6 +38,22 @@ struct ListingImage {
     privacy_status: i8,
     private_indicator_visible: bool,
     private_indicator_text: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct AddressComponent {
+    long_name: String,
+    types: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct GoogleGeocodeResults {
+    address_components: Vec<AddressComponent>,
+}
+
+#[derive(Debug, Deserialize)]
+struct GoogleGeocodeResponse {
+    results: Vec<GoogleGeocodeResults>,
 }
 
 #[tokio::main]
@@ -227,8 +244,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await
             .unwrap_or_default();
 
-        info!("Listing Images: {:?}", &listing_images);
-
         //Currently we know that if the image is public it will have a privacy status of 0
         //Not sure of the other privacy statuses yet
         let images: Vec<String> = listing_images
@@ -236,6 +251,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .filter(|image| image.privacy_status == 0)
             .map(|image| image.image_url.clone())
             .collect();
+
+        let google_geocode_api_key = env!("MK_REALESTATE_GEOCODING_API_KEY");
+
+        let google_geocode_res = reqwest::get(format!(
+            "https://maps.googleapis.com/maps/api/geocode/json?address={}&key={}",
+            &address, google_geocode_api_key,
+        ))
+        .await?;
+
+        let google_geocode = google_geocode_res.json::<GoogleGeocodeResponse>().await?;
+        let mut county = None;
+
+        for result in google_geocode.results {
+            for component in result.address_components {
+                if component
+                    .types
+                    .contains(&"administrative_area_level_2".to_string())
+                {
+                    county = Some(component.long_name);
+                }
+            }
+        }
 
         let listing = Listing {
             _id: listing_id,
@@ -249,7 +286,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             bathrooms,
             square_feet,
             description,
+            county,
         };
+
+        info!("Listing: {:?}", &listing);
 
         listings_results.push(listing);
     }
