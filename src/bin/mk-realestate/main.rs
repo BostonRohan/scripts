@@ -137,7 +137,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .next()
             .expect("Listing status not found")
             .text()
-            .collect::<String>();
+            .collect::<String>()
+            .trim()
+            .to_string();
 
         let specs_selector =
             Selector::parse("div.specTableResults").expect("Unable to parse specs");
