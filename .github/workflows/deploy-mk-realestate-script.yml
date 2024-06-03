@@ -33,6 +33,7 @@ jobs:
             MK_REALESTATE_LISTINGS_API_URL=${{ secrets.MK_REALESTATE_LISTINGS_API_URL }}
             MLS_LISTINGS_SESSION_NUMBER=${{ secrets.MLS_LISTINGS_SESSION_NUMBER }}
             MLS_LISTINGS_FORCE_PUBLIC_VIEW=${{ secrets.MLS_LISTINGS_FORCE_PUBLIC_VIEW }}
+            MK_REALESTATE_GEOCODING_API_KEY=${{ secrets.MK_REALESTATE_GEOCODING_API_KEY }}
 
       - name: Run Docker container
         run: |
