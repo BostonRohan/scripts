@@ -1,8 +1,10 @@
 extern crate log;
 extern crate pretty_env_logger;
+extern crate slugify;
 use log::{debug, info};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
+use slugify::slugify;
 use std::env;
 use url::Url;
 
@@ -26,6 +28,7 @@ struct Listing {
     square_feet: i32,
     bathrooms: i8,
     county: Option<String>,
+    slug: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -276,6 +279,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let listing = Listing {
             _id: listing_id,
+            slug: slugify!(&address),
             address,
             cover_image: cover_image.to_string(),
             images: format!("{:?}", images),
