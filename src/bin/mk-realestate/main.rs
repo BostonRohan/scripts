@@ -284,7 +284,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             cover_image: cover_image.to_string(),
             images: format!("{:?}", images),
             price,
-            listing_number,
+            listing_number: format!("{}", listing_number.replace("Listing", "").trim()),
             listing_status,
             bedrooms,
             bathrooms,
