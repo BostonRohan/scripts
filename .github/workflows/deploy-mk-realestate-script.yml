@@ -1,8 +1,6 @@
 name: Build and Run Docker Image
 
-on:
-  schedule:
-    - cron: "0 0 * * *"
+on: "push"
 
 jobs:
   build-and-run:
