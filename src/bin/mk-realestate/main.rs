@@ -1,6 +1,8 @@
 extern crate log;
 extern crate pretty_env_logger;
 extern crate slugify;
+use chrono::prelude::*;
+use chrono::Utc;
 use log::{debug, info};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
@@ -29,6 +31,7 @@ struct Listing {
     bathrooms: i8,
     county: Option<String>,
     slug: String,
+    last_checked_at: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -277,6 +280,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
+        // Convert to Eastern Daylight Time (EDT)
+        let date = Utc::now();
+        let edt = FixedOffset::west_opt(4 * 3600).expect("Error converting the date to EDT");
+        let date_edt = date.with_timezone(&edt);
+
+        // Format the date and time
+        let formatted_date = format!(
+            "{} EDT",
+            date_edt.format("%b %d %Y at %I:%M %p").to_string()
+        );
+
         let listing = Listing {
             _id: listing_id,
             slug: slugify!(&address),
@@ -291,6 +305,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             square_feet,
             description,
             county,
+            last_checked_at: formatted_date,
         };
 
         info!("Listing: {:?}", &listing);
