@@ -21,5 +21,9 @@ name = "courtneyrohan-migrate-blogger-images"
 path = "src/bin/courtneyrohan/blogger-sanity-image/main.rs"
 
 [[bin]]
+name = "courtneyrohan-migrate-wix-blogs"
+path = "src/bin/courtneyrohan/wix-blog-migration/main.rs"
+
+[[bin]]
 name = "mk-realestate"
 path = "src/bin/mk-realestate/main.rs"
